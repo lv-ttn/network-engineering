@@ -51,7 +51,9 @@ c) Отключить firewall на Windows (GUI)
   end
   wr
 
-
+Результаты:
+1) ping kali1.fam.ru с Windows
+2) ping win1.fam.ru c Kali
   
 
 
