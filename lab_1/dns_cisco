@@ -1,0 +1,57 @@
+Цель: Развернуть DNS-сервер на loopback маршрутизатора cisco
+  
+IP-план:
+fam_1 - f2/0 - 1.2.3.1 - 255.255.255.0
+      - f2/1 - 101.2.3.1 - 255.255.255.0
+      - loopback 1 - 20.1.24.1 - 255.255.255.0
+VPCS0 - 1.2.3.10 - 255.255.255.0 - 1.2.3.1
+Windows - 1.2.3.20 - 255.255.255.0 - 1.2.3.1
+VPCS1 - 101.2.3.10 - 255.255.255.0 - 101.2.3.1
+Kali - 101.2.3.20 - 255.255.255.0 - 101.2.3.1
+  
+1. Настроим конечные устройства
+a) IP, маска, шлюз, DNS на Kali (CLI)
+  sudo su
+  ifconfig eth0 up 
+  ifconfig eth0 101.2.3.20 netmask 255.255.255.0
+  route add default gw 101.2.3.1 eth0 
+  nano /etc/resolv.conf
+  nameserver 20.1.24.1
+b) IP, маска, шлюз, DNS на Windows (GUI)
+  Сеть и интернет -> Ethernet -> Свойства -> IPv4
+  IP: 1.2.3.20
+  Маска: 255.255.255.0
+  Шлюз: 1.2.3.1
+  DNS: 20.1.24.1
+c) Отключить firewall на Windows (GUI)
+  Пуск -> Параметры -> Обновление и безопасность -> Безопасность Windows -> Брандмауэр и защита сети
+  
+2. Раздадим IP-адреса на интерфейсы роутера
+  conf t
+  int fa2/0
+  ip address 1.2.3.1 255.255.255.0
+  no sh
+  ex
+  int fa2/1
+  ip address 101.2.3.1 255.255.255.0
+  no sh
+  ex
+  int loopback 1
+  ip address 20.1.24.1 255.255.255.0
+  no sh
+  end
+  wr
+  
+3. Развернем DNS-сервер
+  conf t
+  ip dns server
+  ip domain-lookup
+  ip host kali1.fam.ru 101.2.3.20
+  ip host win1.fam.ru 1.2.3.20
+  end
+  wr
+
+
+  
+
+
