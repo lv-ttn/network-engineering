@@ -98,7 +98,7 @@ b) VPCS
 c) Windows
    Сеть и интернет -> Неопознанная сеть -> Изменение параметров IP -> Автоматически (DHCP)
 
-4. Подключились по telnet на роутер и на debian c windows
+4. Подключимся по telnet на роутер и на debian c windows
 В putty выбираем connection type = other(telnet), вводим ip
 
 Результаты:
