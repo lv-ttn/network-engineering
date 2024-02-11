@@ -81,6 +81,9 @@ d) Поставим аутентификацию
    username cisco privilege 15 password cisco
    aaa authentication login default local
    line vty 0 15
+   password cisco
+   transport input telnet
+   end
 
 3. Настроим IP на оконечных устройствах
 (Настройки -> Сеть = Не подключена)
