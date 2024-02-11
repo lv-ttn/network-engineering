@@ -76,9 +76,9 @@ c) Настроим DHCP
    dns-server 3.2.24.1
    do wr
 d) Поставим аутентификацию
-   enable secret admin
+   enable secret cisco
    aaa new-model
-   username admin privilege 15 password admin
+   username cisco privilege 15 password cisco
    aaa authentication login default local
    line vty 0 15
 
