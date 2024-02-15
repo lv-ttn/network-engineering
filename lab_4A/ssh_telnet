@@ -1,0 +1,71 @@
+Цель: Настроить SSH на маршрутизаторе и telnet на коммутаторе
+
+IP-план:
+fam_1 - 100.1.2.1 255.255.255.192
+fam_2 - 100.1.2.2 255.255.255.192 - vlan1
+
+1. Настроим маршрутизатор
+a) Выполним базовую настройку маршрутизатора
+   en
+   conf t
+   hostname fam_1
+   int gi0/1
+   ip address 100.1.2.1 255.255.255.192
+   no sh
+   exit
+b) Настроим ssh
+   ip ssh version 2
+   ip domain-name fam.ru
+   crypto key generate rsa
+	 2048
+	 line vty 0 3
+   transport input ssh
+   logging synchronous
+   login local
+   exit
+	 security password min-length 10
+c) Поставим пароль на enable
+   enable secret cisco
+d) Поставим пароль на вход в маршрутизатор
+   username admin privilege 15 password cisco 
+   end
+e) Проверим настройки ssh
+   show crypto key mypubkey rsa
+   show ip ssh 
+   show ssh 
+
+2. Настроим коммутатор
+a) Выполним базовую настройку коммутатора
+   conf t
+   int gi 0/1
+   sw mo ac
+   sw ac vlan1
+   exit
+   int vlan 1
+   ip address 100.1.2.2 255.255.255.192
+   exit
+b) Поставим подключение только по паролю 
+   line console 0
+   password cisco
+   login 
+   enable secret cisco
+   line vty 0 15
+   password cisco
+   transport input telnet
+	 login 
+   end
+c) Включаем шифрование паролей
+   service password encryption
+
+Результаты: 
+С fam_2 можно подключиться на fam_1 по ssh по логину и паролю
+C fam_1 можно подключиться на fam_2 по telnet только по паролю
+
+
+
+
+
+
+
+
+
