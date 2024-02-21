@@ -1,0 +1,73 @@
+Цель: Настроить связность между своим стендом и аналогичным стендом соседей
+
+IP-план:
+R_12 - gi0/0 - 12.12.12.1 - 255.255.255.0
+gi0/1 - 100.100.100.12 - 255.255.255.0
+Sw_12 - gi0/1 - 12.12.12.2 - 255.255.255.0 - 12.12.12.1
+Debian - enp3s0 - 12.12.12.10 - 255.255.255.0 - 12.12.12.1
+
+1. Пропишем базовую настройку маршрутизатора
+en
+conf t
+hostname R_12
+int gi 0/0
+no sh
+ex
+int gi0/1
+ip address 100.100.100.12 255.255.255.0
+no sh 
+ex
+
+2. Настроим путь до сетей соседей 
+ip route 11.11.11.0 255.255.255.0 100.100.100.11
+ip route 10.10.10.0 255.255.255.0 100.100.100.10
+ip route 8.8.8.0 255.255.255.0 100.100.100.8
+ip route 1.1.1.0 255.255.255.0 100.100.100.1
+
+3. Пропишем базовую настройку коммутатора
+en
+conf t
+hostname SW_12
+int vlan1
+ip address 12.12.12.2 255.255.255.0
+ip default-gateway 12.12.12.1
+end
+
+4. Настроим ssh admin/cisco на коммутаторе и паролем на enable cisco
+ip ssh version 2
+ip domain-name fam.ru
+crypto key generate rsa
+2048
+line vty 0 15
+transport input ssh
+logging synchronous
+login local
+password cisco
+exit
+enable secret cisco
+username admin privilege 15 password cisco
+
+5. Зайдем на роутер и проверим настройку ssh
+ssh -l admin 12.12.12.2
+cisco
+exit
+
+6. Настроим оконечное устройство - debian
+nano /etc/network/interfaces
+auto enp0s3
+iface enp0s3 inet static
+address 12.12.12.10 
+netmask 255.255.255.0
+gateway 12.12.12.1
+^X
+systemctl restart networking.service
+   
+7. Подключимся к коммутатору по ssh и проверим подключение к коммутаторам соседей
+ssh -l admin -o KexAlgorithms=diffie-helman-group14-sha1 12.12.12.2
+ssh -l admin -o KexAlgorithms=diffie-helman-group14-sha1 11.11.11.2
+ping 11.11.11.10
+
+Результаты:
+
+ping 11.11.11.10, 10.10.10.10, 8.8.8.10, 1.1.1.10
+ssh 11.11.11.2, 10.10.10.2, 8.8.8.2, 1.1.1.2
