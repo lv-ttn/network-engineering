@@ -1,0 +1,77 @@
+IP-план:
+fam_cisco - gi0/1 - 110.1.2.1 - 255.255.255.192
+fam_eltex - gi0/1 - dhcp
+gi 1/0 - 10.1.2.1 - 255.255.255.128
+loopback 1 - 50.1.2.1 - 255.255.255.224
+
+
+a)  Выполним базовую настройку маршрутизатора cisco
+   en
+   conf t
+   hostname fam_cisco
+   int gi 0/1
+   ip address 110.1.2.1 255.255.255.224
+   no sh
+   ex
+
+b) Настроим NTP-сервер stratum 3
+   ntp master 3
+
+c) Настроим DHCP-сервер
+   ip dhcp pool fam_1
+   default-router 110.1.2.1
+   network 110.1.2.0  /26
+   ex
+
+d) Пропишем статические маршруты
+ip route 0.0.0.0 0.0.0.0 100.1.2.1
+ip route 50.1.2.1 255.255.255.224 100.1.2.1
+ip route 10.1.2.1. 255.255.255.128 100.1.2.1
+
+2. a) Выполним базовую настройку маршрутизатора eltex
+hostname fam_eltex
+int gi1/0/1 
+ip firewall disable
+ip address dhcp
+int gi 1/1/0 
+ip firewall disable
+ip address 10.1.2.1 /25
+int loopback 1
+ip address 50.1.2.1 /27
+username fam1 privilege 15 password password
+
+
+b) Пропишем NTP-клиент
+ntp enable
+version 4
+ntp server 110.1.2.1 prefer
+
+c) Настроим DHCP-сервер
+ip dhcp-server
+ip dhcp-server pool P1
+network 10.10.10.0/24
+default-router 10.10.10.1
+dns-server 8.8.4.4
+domain-name fam.ru
+address-range 10.10.10.2-10.10.10.254
+end
+commit
+confirm
+configure
+ip dhcp-server
+
+d) Настроим удаленное подключение
+ip telnet server
+ip ssh server
+
+3. a)  Получить ip на debian по dhcp
+nano /etc/network/interfaces
+auto enp0s3
+iface enp0s3 inet dhcp
+^X
+dhclient
+systemctl restart networking.service
+   
+b) Подключимся к loopback 1 eltex по ssh и telnet
+ssh -l admin -o KexAlgorithms=diffie-helman-group14-sha1 50.1.2.1
+telnet 50.1.2.1
