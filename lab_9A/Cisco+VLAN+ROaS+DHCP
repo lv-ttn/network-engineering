@@ -98,6 +98,12 @@ ip address dhcp
 no shutdown 
 exit 
 
+4. Очистим настройки
+dir flash:
+delete flash: vlan.dat
+erase start-up config
+reload
+
 Результаты: 
 1) Получили данные о маршрутах в сети соседей через rip
 2) Проходит ping до коммутаторов соседей (11.11.100.2...)
