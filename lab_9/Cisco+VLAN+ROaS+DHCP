@@ -31,14 +31,71 @@ int gi0/1
 switchport mode trunk 
 switchport trunk allowed vlan 100,200
 exit
-b) Настроим telnet
-line console 0
-password cisco
-login 
-enable secret cisco
-line vty 0 15
-password cisco
-transport input telnet
-login 
+int range fa0/21-24,gi0/2
+switchport mode access
+switchport access vlan 555
+shutdown
+exit
+vlan 555
+name UNUSED
+state suspended
 end
 write memory
+
+2. Выполним конфигурацию маршрутизатора R1
+hostname R1
+conf t
+int gi0/0
+ip address 100.100.100.12 255.255.255.0
+no shutdown
+exit
+a) Настроим роутер на палочке
+int gi0/1
+no shutdown
+exit
+int gi0/1.100
+switchport mode trunk
+switchport trunk encapsulation dot1q 100
+no shutdown
+exit
+int gi0/1.200
+switchport mode trunk
+switchport trunk encapsulation dot1q 200
+no shutdown
+exit
+b) Настроим DHCP
+ip dhcp pool VLAN 100
+default-router 12.12.100.1
+network 12.12.100.0 /24
+exit
+ip dhcp pool VLAN 200
+default-router 12.12.200.1
+network 12.12.200.0/24
+exit
+c) Настроим rip
+router rip
+version 2
+passive-interface gi0/1.100
+passive-interface gi0/1.200
+network 12.0.0.0
+network 100.0.0.0
+no auto-summary
+d) Проверим работу конфигурации
+show ip dhcp binding
+show ip route
+show ip route rip
+
+3. Получим ip на vlan 100, 200
+conf t
+vlan 100
+ip address dhcp
+no shutdown
+exit
+vlan 200
+ip address dhcp
+no shutdown 
+exit 
+
+Результаты: 
+1) Получили данные о маршрутах в сети соседей через rib
+2) Проходит ping до коммутаторов соседей (11.11.100.2...)
