@@ -87,7 +87,7 @@ show ip dhcp binding
 show ip route
 show ip route rip
 
-3. Получим ip на vlan 100, 200
+3. Получим ip на vlan 100, 200(SW1)
 conf t
 vlan 100
 ip address dhcp
