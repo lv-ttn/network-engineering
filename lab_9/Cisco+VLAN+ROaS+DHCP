@@ -1,0 +1,44 @@
+IP-план:
+SW1 - vlan 100 - *
+    - vlan 200 - *
+R1 - int gi0/1.100 - 12.12.100.1 - 255.255.255.0
+   - int gi0/1.200 - 12.12.200.1 - 255.255.255.0
+   - int gi0/0 - 100.100.100.12 - 255.255.255.0
+
+1. Выполним конфигурацию коммутатора SW1
+en
+conf t
+hostname SW1
+a) Настроим vlan
+int range fa0/1-10
+switchport mode access
+switchport access vlan 100
+no shutdown
+exit
+int range fa0/11-20
+switchport mode access
+switchport access vlan 200
+no shutdown
+vlan 100
+name ADMIN
+no shutdown
+exit
+vlan 200
+name STUD
+no shutdown
+exit
+int gi0/1
+switchport mode trunk 
+switchport trunk allowed vlan 100,200
+exit
+b) Настроим telnet
+line console 0
+password cisco
+login 
+enable secret cisco
+line vty 0 15
+password cisco
+transport input telnet
+login 
+end
+write memory
