@@ -99,8 +99,7 @@ no shutdown
 exit 
 
 4. Очистим настройки
-dir flash:
-delete flash: vlan.dat
+delete flash:vlan.dat
 erase start-up config
 reload
 
